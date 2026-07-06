@@ -19,7 +19,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install tweepy google-generativeai
+        run: pip install tweepy google-genai
 
       - name: Post to X
         env:
