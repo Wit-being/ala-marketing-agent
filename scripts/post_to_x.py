@@ -20,7 +20,7 @@ PROMPTS = [
 # ── Generate tweet content ────────────────────────────────────────────────────
 prompt = random.choice(PROMPTS)
 response = client_genai.models.generate_content(
-    model="gemini-1.5-flash-latest",
+    model="gemini-2.0-flash",
     contents=prompt,
 )
 tweet_text = response.text.strip()
