@@ -1,13 +1,12 @@
 import os
 import tweepy
-import google.generativeai as genai
+from google import genai
 import random
 
 # ── Gemini setup ─────────────────────────────────────────────────────────────
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-1.5-flash")
+client_genai = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-# ── Tweet prompt variations — keeps content fresh and non-repetitive ─────────
+# ── Tweet prompt variations ───────────────────────────────────────────────────
 PROMPTS = [
     "Write a single tweet (max 260 characters) for @alaapp_, a dream journaling and sharing app. The tweet should be thought-provoking, mysterious or fascinating about dreams. No hashtags. No emojis unless they add value. Conversational, not corporate. Don't mention the app directly.",
     "Write a single tweet (max 260 characters) for @alaapp_, a dream journaling app. Ask a curious question about dreams that makes people stop and think. Something that non-dreamers and vivid dreamers alike would find interesting. No hashtags.",
@@ -20,7 +19,10 @@ PROMPTS = [
 
 # ── Generate tweet content ────────────────────────────────────────────────────
 prompt = random.choice(PROMPTS)
-response = model.generate_content(prompt)
+response = client_genai.models.generate_content(
+    model="gemini-2.0-flash",
+    contents=prompt,
+)
 tweet_text = response.text.strip()
 
 # Clean up any quotation marks Gemini wraps around the tweet
@@ -34,12 +36,12 @@ if len(tweet_text) > 280:
 print(f"Generated tweet ({len(tweet_text)} chars):\n{tweet_text}\n")
 
 # ── Post to X via OAuth 1.0a ──────────────────────────────────────────────────
-client = tweepy.Client(
+client_x = tweepy.Client(
     consumer_key=os.environ["X_API_KEY"],
     consumer_secret=os.environ["X_API_SECRET"],
     access_token=os.environ["X_ACCESS_TOKEN"],
     access_token_secret=os.environ["X_ACCESS_TOKEN_SECRET"],
 )
 
-response = client.create_tweet(text=tweet_text)
-print(f"Tweet posted successfully. Tweet ID: {response.data['id']}")
+response_x = client_x.create_tweet(text=tweet_text)
+print(f"Tweet posted successfully. Tweet ID: {response_x.data['id']}")
