@@ -1,12 +1,10 @@
 import os
-import tweepy
-import urllib.request
-import json
 import random
+import tweepy
+from groq import Groq
 
-# ── Groq API setup (free, no billing needed) ─────────────────────────────────
-GROQ_API_KEY = os.environ["GROQ_API_KEY"]
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+# ── Groq setup ────────────────────────────────────────────────────────────────
+client_groq = Groq(api_key=os.environ["GROQ_API_KEY"])
 
 # ── Tweet prompt variations ───────────────────────────────────────────────────
 PROMPTS = [
@@ -19,31 +17,17 @@ PROMPTS = [
     "Write a single tweet (max 260 characters) for @alaapp_. Write a tweet about what it would mean if you could read someone else's dream. Thought-provoking, not promotional. No hashtags. Reply with only the tweet text, nothing else.",
 ]
 
-# ── Generate tweet content via Groq ──────────────────────────────────────────
+# ── Generate tweet content ────────────────────────────────────────────────────
 prompt = random.choice(PROMPTS)
 
-payload = json.dumps({
-    "model": "llama3-8b-8192",
-    "messages": [{"role": "user", "content": prompt}],
-    "max_tokens": 100,
-    "temperature": 0.9,
-}).encode("utf-8")
-
-req = urllib.request.Request(
-    GROQ_URL,
-    data=payload,
-    headers={
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json",
-        "User-Agent": "ala-marketing-agent/1.0",
-    },
-    method="POST",
+completion = client_groq.chat.completions.create(
+    model="llama3-8b-8192",
+    messages=[{"role": "user", "content": prompt}],
+    max_tokens=100,
+    temperature=0.9,
 )
 
-with urllib.request.urlopen(req) as res:
-    data = json.loads(res.read().decode("utf-8"))
-
-tweet_text = data["choices"][0]["message"]["content"].strip()
+tweet_text = completion.choices[0].message.content.strip()
 
 # Clean up any quotation marks the model wraps around the tweet
 if tweet_text.startswith('"') and tweet_text.endswith('"'):
