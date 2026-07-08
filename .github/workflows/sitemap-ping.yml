@@ -1,0 +1,33 @@
+name: Ping Search Engines
+
+on:
+  workflow_run:
+    workflows: ["Blog Post Generator"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  ping-search-engines:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Ping Google
+        run: |
+          curl -s "https://www.google.com/ping?sitemap=https://alaapp.site/sitemap.xml" && echo "Google pinged"
+
+      - name: Ping Bing
+        run: |
+          curl -s "https://www.bing.com/indexnow?url=https://alaapp.site/sitemap.xml&key=${{ secrets.BING_INDEXNOW_KEY }}" && echo "Bing pinged"
+
+      - name: Ping IndexNow (covers Yandex, Seznam, Naver too)
+        run: |
+          curl -s -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "host": "alaapp.site",
+              "key": "${{ secrets.BING_INDEXNOW_KEY }}",
+              "keyLocation": "https://alaapp.site/${{ secrets.BING_INDEXNOW_KEY }}.txt",
+              "urlList": ["https://alaapp.site/sitemap.xml"]
+            }' && echo "IndexNow pinged"
