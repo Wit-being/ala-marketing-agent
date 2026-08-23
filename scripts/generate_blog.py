@@ -49,7 +49,7 @@ Write only the blog post body content. No title, no frontmatter, just the body t
 """
 
 completion = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",
+    model="openai/gpt-oss-120b",  # was: llama-3.3-70b-versatile (deprecated)
     messages=[{"role": "user", "content": prompt}],
     max_tokens=1200,
     temperature=0.85,
