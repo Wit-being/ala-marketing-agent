@@ -61,7 +61,7 @@ content = completion.choices[0].message.content.strip()
 excerpt_prompt = f"Write a single sentence excerpt (max 160 characters) for a blog post titled: '{title}'. Make it compelling and click-worthy. Reply with only the excerpt text."
 
 excerpt_completion = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",
+    model="openai/gpt-oss-120b",
     messages=[{"role": "user", "content": excerpt_prompt}],
     max_tokens=60,
     temperature=0.7,
